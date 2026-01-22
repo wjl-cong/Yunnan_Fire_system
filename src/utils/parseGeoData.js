@@ -22,6 +22,10 @@ export const parseGeoData = (geoData = defaultGeoData) => {
         props.latitude = feature.geometry.coordinates[1].toFixed(3)
       }
       return props
+    }).sort((a, b) => {
+      // 按日期降序排序 (最新的在前)
+      return new Date(b.acq_date + ' ' + b.acq_time.substring(0,2) + ':' + b.acq_time.substring(2,4)) - 
+             new Date(a.acq_date + ' ' + a.acq_time.substring(0,2) + ':' + a.acq_time.substring(2,4))
     })
 
     // 1. 火险等级统计 (Confidence Level)

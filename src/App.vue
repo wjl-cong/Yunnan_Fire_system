@@ -536,7 +536,7 @@ const performHeatmapAnalysis = () => {
       v-model="drawerVisible"
       title="区域火点详细信息"
       direction="rtl"
-      size="400px"
+      size="340px"
       :modal="false" 
       :lock-scroll="false"
       class="fire-drawer"
@@ -766,38 +766,43 @@ const performHeatmapAnalysis = () => {
 
 /* 抽屉样式深度优化 */
 :deep(.fire-drawer) {
+  background-color: rgba(13, 27, 46, 0.95) !important;
+  color: #fff !important;
+  
   .el-drawer__header {
-    background-color: #0d1b2e !important;
-    margin-bottom: 0 !important;
-    padding: 15px 20px !important;
-    color: #fff !important;
-    border-bottom: 1px solid rgba(64, 158, 255, 0.3) !important;
+    color: #fff;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 15px;
   }
-  .el-drawer__body {
-    background-color: #0d1b2e !important;
-    padding: 10px !important;
-  }
+  
+  
   .el-table {
     background-color: transparent !important;
-    color: #fff !important;
-    --el-table-border-color: rgba(255, 255, 255, 0.1);
-    --el-table-header-bg-color: rgba(64, 158, 255, 0.1);
-    --el-table-row-hover-bg-color: rgba(64, 158, 255, 0.2);
+    color: #fff;
+    --el-table-border-color: rgba(255, 255, 255, 0.2);
+    --el-table-header-bg-color: rgba(0, 0, 0, 0.3);
+    --el-table-row-hover-bg-color: rgba(255, 255, 255, 0.1);
     
-    tr, th, td {
+    th, tr {
       background-color: transparent !important;
-      color: #fff !important;
     }
     
-    // 解决斑马纹导致的白色背景
-    &.el-table--striped .el-table__row--striped td {
-      background-color: rgba(255, 255, 255, 0.05) !important;
+    th.el-table__cell {
+      background-color: rgba(0, 0, 0, 0.3) !important;
+      font-weight: bold;
+      color: #409eff;
+    }
+    
+    td.el-table__cell {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .el-table__inner-wrapper::before {
-      background-color: rgba(255, 255, 255, 0.1) !important;
+      background-color: rgba(255, 255, 255, 0.1);
     }
   }
+  
 }
 
 // 内容区域
@@ -840,7 +845,7 @@ const performHeatmapAnalysis = () => {
     }
     .toolbox {
       position: absolute;
-      bottom: 80px; /* 下调工具栏位置，使其紧邻页脚上方 */
+      bottom: 45px;
       left: 50%;
       transform: translateX(-50%);
       width: 60%;
@@ -932,7 +937,7 @@ const performHeatmapAnalysis = () => {
   user-select: text;
   text-align: center;
   position: fixed;
-  bottom: 50px;
+  bottom: 0px;
   padding: 6px;
   background-color: rgba(0, 0, 0, 0.7); /* 半透明的深色背景 */
   color: #f0f0f0; /* 柔和的白色文字 */
@@ -979,4 +984,58 @@ const performHeatmapAnalysis = () => {
     }
   }
 }
+
+
+/* 抽屉样式深度优化 */
+:deep(.fire-drawer) {
+  background-color: rgba(13, 27, 46, 0.95) !important;
+  color: #fff !important;
+  
+  .el-drawer__header {
+    color: #fff;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 15px;
+  }
+  
+  .el-table {
+    background-color: transparent !important;
+    --el-table-bg-color: transparent !important;
+    --el-table-tr-bg-color: transparent !important;
+    --el-table-header-bg-color: rgba(0, 0, 0, 0.3) !important;
+    color: #fff !important;
+    
+    /* 表头背景 */
+    th.el-table__cell {
+      background-color: rgba(0, 0, 0, 0.3) !important;
+      font-weight: bold;
+      color: #409eff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* 单元格背景和边框 */
+    td.el-table__cell {
+      background-color: transparent !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    
+    /* 去除斑马纹白色背景，改为微透明亮色或纯透明 */
+    &.el-table--striped .el-table__body tr.el-table__row--striped td {
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    /* 去除或修改悬停颜色 */
+    .el-table__body tr:hover > td {
+      background-color: rgba(255, 255, 255, 0.08) !important; /* 微弱高亮 */
+    }
+    
+    /* 去除底部横线 */
+    .el-table__inner-wrapper::before {
+      background-color: rgba(255, 255, 255, 0.1);
+      height: 0;
+    }
+  }
+}
+
 </style>

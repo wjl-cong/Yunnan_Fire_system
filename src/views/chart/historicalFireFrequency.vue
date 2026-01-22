@@ -17,9 +17,10 @@ const tableData = ref([])
 // 分页配置
 const currentPage = ref(1)
 const pageSize = ref(20)
+const isLoading = ref(false)
 
 // 表格数据
-tableData.value = geoData.rawFeatures
+tableData.value = geoData.rawFeatures || []
 
 // 计算当前页数据
 const paginatedData = computed(() => {
@@ -29,7 +30,14 @@ const paginatedData = computed(() => {
 })
 
 const handleCurrentChange = (val) => {
+  isLoading.value = true
   currentPage.value = val
+  setTimeout(() => { isLoading.value = false }, 300)
+}
+
+const handleSizeChange = (val) => {
+  pageSize.value = val
+  currentPage.value = 1
 }
 
 
@@ -37,6 +45,7 @@ const handleCurrentChange = (val) => {
 const top7Days = geoData.dailyCounts
   .sort((a, b) => b.value - a.value)
   .slice(0, 7)
+
 
 
 const option = {
@@ -48,13 +57,13 @@ const option = {
   grid: {
     left: '3%',
     right: '4%',
-    bottom: '15%',
+    bottom: '10%',
     containLabel: true
   },
   xAxis: {
     type: 'category',
     data: top7Days.map(item => item.name),
-    axisLabel: { color: '#fff', rotate: 45 },
+    axisLabel: { color: '#fff' },
     axisLine: { lineStyle: { color: '#fff' } }
   },
   yAxis: {
@@ -83,19 +92,19 @@ const option = {
   ]
 }
 
-const initChart = () => {
-  if (chartRef.value) {
-    if (chartInstance) chartInstance.dispose()
-    chartInstance = echarts.init(chartRef.value)
-    chartInstance.setOption(option)
-  }
-}
-
 const initMaxChart = () => {
   if (maxChartRef.value) {
     if (maxChartInstance) maxChartInstance.dispose()
     maxChartInstance = echarts.init(maxChartRef.value)
     maxChartInstance.setOption(option)
+  }
+}
+
+const initChart = () => {
+  if (chartRef.value) {
+    if (chartInstance) chartInstance.dispose()
+    chartInstance = echarts.init(chartRef.value)
+    chartInstance.setOption(option)
   }
 }
 
@@ -153,23 +162,37 @@ onUnmounted(() => {
           
           <!-- 右侧表格 -->
           <div class="table-area">
-             <el-table :data="paginatedData" style="width: 100%" height="calc(100% - 50px)" stripe>
-               
-          <el-table-column prop="acq_date" label="日期" width="120" sortable />
-          <el-table-column prop="acq_time" label="时间" width="100" />
-          <el-table-column prop="latitude" label="纬度" width="100" />
-          <el-table-column prop="longitude" label="经度" width="100" />
-
-             </el-table>
-             <div class="pagination-container">
-               <el-pagination
-                 v-model:current-page="currentPage"
-                 v-model:page-size="pageSize"
-                 :total="tableData.length"
-                 layout="total, prev, pager, next"
-                 @current-change="handleCurrentChange"
-               />
-             </div>
+            <div class="table-content-wrapper">
+              <!-- 使用 CSS 绝对定位撑满容器，无需 JS 计算 -->
+              <el-table
+                v-if="isMaximized"
+                v-loading="isLoading"
+                :data="paginatedData"
+                stripe
+                border
+                style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"
+                :header-cell-style="{ background: '#f8fafc', color: '#606266', fontWeight: 'bold' }"
+              >
+                
+                  <el-table-column prop="acq_date" label="日期" min-width="120" sortable />
+                  <el-table-column prop="acq_time" label="时间" min-width="100" />
+                  <el-table-column prop="latitude" label="纬度" min-width="100" />
+                  <el-table-column prop="longitude" label="经度" min-width="100" />
+              </el-table>
+            </div>
+             
+            <div class="pagination-container">
+              <el-pagination popper-class="chart-pagination-popper"
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :page-sizes="[20, 50, 100, 200, 500]"
+                :total="tableData.length"
+                layout="total, sizes, prev, pager, next, jumper"
+                background
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -178,6 +201,7 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss" scoped>
+
 .chart-wrapper {
   width: 100%;
   height: 100%;
@@ -227,11 +251,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   
-  .header-bar { padding-right: 20px;
+  .header-bar { 
+    padding-right: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    flex-shrink: 0;
     
     .max-title {
       font-size: 24px;
@@ -247,27 +273,99 @@ onUnmounted(() => {
     gap: 20px;
     
     .chart-area-max {
-      flex: 1;
+      width: 40%;
       height: 100%;
       background: rgba(255,255,255,0.05);
       border-radius: 8px;
     }
-    
+
     .table-area {
-      flex: 1;
-      height: 100%;
-      background: #fff;
-      border-radius: 8px;
+      flex: 1; 
+      height: 100%; 
+      background: #fff; 
+      border-radius: 8px; 
       padding: 10px;
-      display: flex;
+      display: flex; 
       flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
+      
+      .table-content-wrapper {
+        flex: 1;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      :deep(.el-table) {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #ebeef5;
+        --el-table-border-color: #ebeef5;
+        background-color: #fff; 
+      }
+
+      :deep(.el-table .el-table__header-wrapper th) {
+        background: #f8fafc;
+        font-weight: 600;
+        border-bottom: 1px solid #ebeef5;
+        color: #606266;
+      }
+
+      /* Fix: Distinct stripe color (light blue-gray) to be clearly visible against white */
+      :deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
+        background: #e8ecf5 !important;
+      }
+
+      /* Fix: Hover color slightly darker */
+      :deep(.el-table .el-table__body tr:hover > td) {
+        background: #d9e4f7 !important;
+      }
+      
+      :deep(.el-table .cell) {
+        padding: 12px 16px;
+        font-size: 13px;
+        color: #606266;
+      }
+
+      :deep(.el-pagination) {
+        width: 100%;
+        justify-content: flex-end;
+      }
       
       .pagination-container {
-        margin-top: 10px;
-        display: flex;
-        justify-content: center;
+        height: 70px;
+        flex-shrink: 0;
+        display: flex; 
+        justify-content: space-between;
+        align-items: center; 
+        border-top: none;
+        padding-top: 5px;
+        padding-bottom: 25px;
+        padding-right: 20px;
       }
     }
   }
+}
+
+</style>
+
+
+<style>
+/* 全局修正分页下拉菜单可见性 */
+.chart-pagination-popper {
+  z-index: 999999 !important; /* 确保在最上层 */
+}
+.chart-pagination-popper .el-select-dropdown__item {
+  color: #606266 !important; /* 强制文字颜色为深灰 */
+}
+.chart-pagination-popper .el-select-dropdown__item.hover,
+.chart-pagination-popper .el-select-dropdown__item:hover {
+  background-color: #f5f7fa !important; /* 悬停背景 */
+  color: #606266 !important;
+}
+.chart-pagination-popper .el-select-dropdown__item.selected {
+  color: #409eff !important; /* 选中颜色 */
+  font-weight: bold;
 }
 </style>
